@@ -24,7 +24,9 @@ if ($Env:cloudEnv -ne 'AzureCloud') {
 }
 
 Write-Output "Starting Deployment for Files in path: $Env:directory"
-Get-ChildItem $Env:directory -Filter *.json |
-ForEach-Object {
-    New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $_.FullName -logAnalyticsWorkspaceName $Env:workspaceName
+if (Test-Path -Path $Env:directory) {
+    Get-ChildItem $Env:directory -Filter *.json |
+    ForEach-Object {
+        New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $_.FullName -logAnalyticsWorkspaceName $Env:workspaceName
+    }
 }
