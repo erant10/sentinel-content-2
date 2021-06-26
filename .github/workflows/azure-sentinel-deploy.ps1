@@ -33,7 +33,7 @@ if (Test-Path -Path $Env:directory) {
             New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -logAnalyticsWorkspaceName $Env:workspaceName
         }
         Catch {
-            Write-Warning "Failed to deploy $CurrentFile : $_"
+            Write-Output "[Warning] Failed to deploy $CurrentFile : $_"
         }
     }
 }
