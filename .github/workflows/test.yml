@@ -1,13 +1,13 @@
-  
 name: Test 123
 on: 
   push:
     branches: [ main ]
 
 jobs:
-  deploy-content:
+  test1:
     runs-on: windows-latest
-    - name: Deploy Analytic Rules
+    steps:
+    - name: Test
       uses: azure/powershell@v1
       with:
         azPSVersion: 'latest'
