@@ -27,6 +27,12 @@ Write-Output "Starting Deployment for Files in path: $Env:directory"
 if (Test-Path -Path $Env:directory) {
     Get-ChildItem $Env:directory -Filter *.json |
     ForEach-Object {
-        New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $_.FullName -logAnalyticsWorkspaceName $Env:workspaceName
+        Try {
+            Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $_.FullName -logAnalyticsWorkspaceName $Env:workspaceName
+            New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $_.FullName -logAnalyticsWorkspaceName $Env:workspaceName
+        }
+        Catch {
+            $_
+        }
     }
 }
