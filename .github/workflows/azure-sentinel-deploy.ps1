@@ -37,3 +37,6 @@ if (Test-Path -Path $Env:directory) {
         }
     }
 }
+else {
+    Write-Output "[Warning] $Env:directory not found. nothing to deploy"
+}
