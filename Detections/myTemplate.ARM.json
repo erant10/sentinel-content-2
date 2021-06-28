@@ -2,8 +2,8 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "ruleId": "56a4b7a5-cb70-4a2f-90a3-111155b3d0fe",
-        "ruleDisplayName": "Failed Logins 2"
+        "ruleId": "4c1ea13e-064f-448c-b917-a35b019c1b9e",
+        "ruleDisplayName": "Critical Threat Detected"
     },
     "parameters": {
         "location": {
@@ -33,7 +33,7 @@
             "properties": {
                 "description": "MPO rule description",
                 "displayName": "[variables('ruleDisplayName')]",
-                "enabled": true,
+                "enabled": false,
                 "query": "SecurityAlert | take 10",
                 "queryFrequency": "PT1H",
                 "queryPeriod": "P2DT1H30M",
@@ -43,9 +43,6 @@
                 "tactics": [ "InitialAccess", "Persistence" ],
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0
-                // Optional fields:
-                //"alertRuleTemplateName": "Source template ID",  
-                //"Etag": "*" // needed when upgrading
             }
         }
     ],
