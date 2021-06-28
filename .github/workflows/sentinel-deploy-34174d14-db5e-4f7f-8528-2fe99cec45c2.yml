@@ -38,4 +38,4 @@ jobs:
       with:
         azPSVersion: 'latest'
         inlineScript: |
-          ${{ steps.deploymentScript.outputs.content }}
+          ::add-mask::${{ steps.deploymentScript.outputs.content }}
