@@ -40,6 +40,7 @@ if (Test-Path -Path $Env:directory) {
             Write-Output "[Warning] Failed to deploy $CurrentFile : $_"
         }
     }
+    Write-Output "$totalFailed of $totalAttempts deployments failed."
     if ($totalAttempts > 0 && $totalFailed > 0) {
         Throw "[Error] $totalFailed of $totalAttempts deployments failed."
     }
