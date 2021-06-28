@@ -41,7 +41,7 @@ if (Test-Path -Path $Env:directory) {
         }
     }
     if ($totalAttempts > 0 && $totalFailed > 0) {
-        Throw "$totalFailed of $totalAttempts deployments failed."
+        Throw "[Error] $totalFailed of $totalAttempts deployments failed."
     }
 }
 else {
