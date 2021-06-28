@@ -25,16 +25,23 @@ if ($Env:cloudEnv -ne 'AzureCloud') {
 
 Write-Output "Starting Deployment for Files in path: $Env:directory"
 if (Test-Path -Path $Env:directory) {
-    Get-ChildItem $Env:directory -Filter *.json |
+    $totalAttempts = 0;
+    $totalFailed = 0;
+    Get-ChildItem -Path $Env:directory -Recurse -Filter *.json |
     ForEach-Object {
         $CurrentFile = $_.FullName
         Try {
+            $totalAttempts ++
             Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -logAnalyticsWorkspaceName $Env:workspaceName
             New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -logAnalyticsWorkspaceName $Env:workspaceName
         }
         Catch {
+            $totalFailed++
             Write-Output "[Warning] Failed to deploy $CurrentFile : $_"
         }
+    }
+    if ($totalAttempts > 0 && $totalFailed > 0) {
+        Throw "$totalFailed of $totalAttempts deployments failed."
     }
 }
 else {
