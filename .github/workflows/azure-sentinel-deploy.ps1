@@ -20,6 +20,7 @@ function ConnectAzCloud {
 
 function IsValidTemplate($path) {
     Try {
+        Write-Output "Testing $path for deployment"
         Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
         return $true
     }
@@ -56,7 +57,8 @@ if (Test-Path -Path $Env:directory) {
     ForEach-Object {
         $CurrentFile = $_.FullName
         $totalFiles ++
-        if (-not (IsValidTemplate $CurrentFile)) {
+        $isValid = IsValidTemplate $CurrentFile
+        if (-not $isValid) {
             continue
         }
         $isSuccess = $false
