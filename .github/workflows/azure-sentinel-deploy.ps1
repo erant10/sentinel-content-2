@@ -44,7 +44,8 @@ if (Test-Path -Path $Env:directory) {
     ForEach-Object {
         $CurrentFile = $_.FullName
         $totalFiles ++
-        if (-not IsValidTemplate $CurrentFile) {
+        $isValid = IsValidTemplate $CurrentFile
+        if (-not $isValid) {
             return
         }
         $isSuccess = $false
