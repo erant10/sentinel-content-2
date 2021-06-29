@@ -20,24 +20,11 @@ function ConnectAzCloud {
 
 function IsValidTemplate($path) {
     Try {
-        Write-Output "Testing $path for deployment"
         Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
         return $true
     }
     Catch {
-        Write-Output "[Warning] The file $path is not valid: $_"
-        return $false
-    }
-}
-
-function AttemptDeploy($path) {
-    Try {
-        Write-Output "Trying to deploy $path"
-        New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
-        return $true
-    }
-    Catch {        
-        Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
+        Write-Host "[Warning] The file $path is not valid: $_"
         return $false
     }
 }
@@ -57,21 +44,24 @@ if (Test-Path -Path $Env:directory) {
     ForEach-Object {
         $CurrentFile = $_.FullName
         $totalFiles ++
-        $isValid = IsValidTemplate $CurrentFile
-        if (-not $isValid) {
-            continue
+        if (-not IsValidTemplate $CurrentFile) {
+            return
         }
         $isSuccess = $false
         $currentAttempt = 1
         While (($currentAttempt -le $MaxRetries) -and (-not $isSuccess)) {
             Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
             $currentAttempt ++
-            $isSuccess = AttemptDeploy $CurrentFile
+            Try {
+                New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -logAnalyticsWorkspaceName $Env:workspaceName
+                $isSuccess = $true
+            }
+            Catch {        
+                Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
+                $isSuccess = $false
+            }
         }
-        if ($isSuccess) {
-            Write-Output "Successfully deployed $CurrentFile."
-        }
-        else {
+        if (-not $isSuccess) {
             Write-Output "[Warning] Unable to deploy $CurrentFile. Deployment failed after $MaxRetries unsuccessful attempts."
         }
     }
