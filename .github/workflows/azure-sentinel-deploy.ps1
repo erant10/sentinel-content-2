@@ -18,30 +18,68 @@ function ConnectAzCloud {
     Set-AzContext -Tenant $RawCreds.tenantId | out-null;
 }
 
+function IsValidTemplate {
+    Param(
+        [String] $path
+    )
+    Try {
+        Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
+        return $true
+    }
+    Catch {
+        Write-Output "[Warning] The file $path is not valid: $_"
+        return $false
+    }
+}
+
+function AttemptDeployFile {
+    Param(
+        [String] $path
+    )
+    Try {   
+        New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
+        return $true
+    }
+    Catch {        
+        Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
+        return $false
+    }
+}
+
 if ($Env:cloudEnv -ne 'AzureCloud') {
     Write-Output "Attempting Sign In to Azure Cloud"
     ConnectAzCloud
 }
 
 Write-Output "Starting Deployment for Files in path: $Env:directory"
+$MaxRetries = 3;
+
 if (Test-Path -Path $Env:directory) {
-    $totalAttempts = 0;
+    $totalFiles = 0;
     $totalFailed = 0;
     Get-ChildItem -Path $Env:directory -Recurse -Filter *.json |
     ForEach-Object {
         $CurrentFile = $_.FullName
-        Try {
-            $totalAttempts ++
-            Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -logAnalyticsWorkspaceName $Env:workspaceName
-            New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -logAnalyticsWorkspaceName $Env:workspaceName
+        $totalFiles ++
+        if (-not IsValidTemplate $CurrentFile) {
+            continue
         }
-        Catch {
-            $totalFailed++
-            Write-Output "[Warning] Failed to deploy $CurrentFile : $_"
+        $isSuccess = $false
+        $currentAttempt = 1
+        While ($currentAttempt -le $MaxRetries && -not $isSuccess) {
+            Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
+            $currentAttempt ++
+            $isSuccess = AttemptDeployFile $CurrentFile
+        }
+        if ($isSuccess) {
+            Write-Output "Successfully deployed $CurrentFile."
+        }
+        else {
+            Write-Output "[Warning] Unable to deploy $CurrentFile. Deployment failed after $MaxRetries unsuccessful attempts."
         }
     }
-    if ($totalAttempts -gt 0 && $totalFailed -gt 0) {
-        $error = "$totalFailed of $totalAttempts deployments failed."
+    if ($totalFiles -gt 0 && $totalFailed -gt 0) {
+        $error = "$totalFailed of $totalFiles deployments failed."
         Throw $error
     }
 }
