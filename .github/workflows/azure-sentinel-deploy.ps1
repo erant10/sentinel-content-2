@@ -18,10 +18,7 @@ function ConnectAzCloud {
     Set-AzContext -Tenant $RawCreds.tenantId | out-null;
 }
 
-function IsValidTemplate {
-    Param(
-        [String] $path
-    )
+function IsValidTemplate($path) {
     Try {
         Test-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
         return $true
@@ -32,10 +29,7 @@ function IsValidTemplate {
     }
 }
 
-function AttemptDeploy {
-    Param(
-        [String] $path
-    )
+function AttemptDeploy($path) {
     Try {
         Write-Output "Trying to deploy $path"
         New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
