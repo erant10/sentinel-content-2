@@ -32,11 +32,12 @@ function IsValidTemplate {
     }
 }
 
-function AttemptDeployFile {
+function AttemptDeploy {
     Param(
         [String] $path
     )
-    Try {   
+    Try {
+        Write-Output "Trying to deploy $path"
         New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $path -logAnalyticsWorkspaceName $Env:workspaceName
         return $true
     }
@@ -69,7 +70,7 @@ if (Test-Path -Path $Env:directory) {
         While (($currentAttempt -le $MaxRetries) && (-not $isSuccess)) {
             Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
             $currentAttempt ++
-            $isSuccess = AttemptDeployFile $CurrentFile
+            $isSuccess = AttemptDeploy $CurrentFile
         }
         if ($isSuccess) {
             Write-Output "Successfully deployed $CurrentFile."
