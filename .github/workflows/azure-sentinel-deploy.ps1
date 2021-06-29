@@ -66,7 +66,7 @@ if (Test-Path -Path $Env:directory) {
         }
         $isSuccess = $false
         $currentAttempt = 1
-        While ($currentAttempt -le $MaxRetries && -not $isSuccess) {
+        While (($currentAttempt -le $MaxRetries) && (-not $isSuccess)) {
             Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
             $currentAttempt ++
             $isSuccess = AttemptDeployFile $CurrentFile
