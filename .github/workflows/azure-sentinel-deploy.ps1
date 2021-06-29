@@ -61,7 +61,7 @@ if (Test-Path -Path $Env:directory) {
         }
         $isSuccess = $false
         $currentAttempt = 1
-        While (($currentAttempt -le $MaxRetries) && (-not $isSuccess)) {
+        While (($currentAttempt -le $MaxRetries) -and (-not $isSuccess)) {
             Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
             $currentAttempt ++
             $isSuccess = AttemptDeploy $CurrentFile
@@ -73,7 +73,7 @@ if (Test-Path -Path $Env:directory) {
             Write-Output "[Warning] Unable to deploy $CurrentFile. Deployment failed after $MaxRetries unsuccessful attempts."
         }
     }
-    if ($totalFiles -gt 0 && $totalFailed -gt 0) {
+    if ($totalFiles -gt 0 -and $totalFailed -gt 0) {
         $error = "$totalFailed of $totalFiles deployments failed."
         Throw $error
     }
