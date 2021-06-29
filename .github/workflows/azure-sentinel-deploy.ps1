@@ -46,6 +46,7 @@ if (Test-Path -Path $Env:directory) {
         $totalFiles ++
         $isValid = IsValidTemplate $CurrentFile
         if (-not $isValid) {
+            totalFailed++
             return
         }
         $isSuccess = $false
@@ -63,6 +64,7 @@ if (Test-Path -Path $Env:directory) {
             }
         }
         if (-not $isSuccess) {
+            totalFailed++
             Write-Output "[Warning] Unable to deploy $CurrentFile. Deployment failed after $MaxRetries unsuccessful attempts."
         }
     }
