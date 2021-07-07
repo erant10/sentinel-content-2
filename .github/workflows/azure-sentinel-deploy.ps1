@@ -1,3 +1,28 @@
+function AttemptAzLogin([SecureString] $psCredential, $tenantId, $cloudEnv) {
+    $maxLoginRetries = 3
+    $delayInSeconds = 30
+    $stopTrying = $false
+    do {
+        try {
+            Connect-AzAccount -ServicePrincipal -Tenant $tenantId -Credential $psCredential -Environment $cloudEnv | out-null;
+            Write-Host "Login Successful"
+            $stopTrying = $true
+        }
+        catch {
+            if ($retryCount -gt $maxLoginRetries) {
+                Write-Host "Login failed after $maxLoginRetries attempts."
+                $stopTrying = $true
+            }
+            else {
+                Write-Host "Login attempt failed, retrying in $delayInSeconds seconds."
+                Start-Sleep -Seconds $delayInSeconds
+                $retryCount++
+            }
+        }
+    }
+    while (-not $stopTrying)
+}
+
 function ConnectAzCloud {
     $RawCreds = $Env:creds | ConvertFrom-Json
 
@@ -14,7 +39,7 @@ function ConnectAzCloud {
     $servicePrincipalKey = ConvertTo-SecureString $RawCreds.clientSecret.replace("'", "''") -AsPlainText -Force
     $psCredential = New-Object System.Management.Automation.PSCredential($RawCreds.clientId, $servicePrincipalKey)
 
-    Connect-AzAccount -ServicePrincipal -Tenant $RawCreds.tenantId -Credential $psCredential -Environment $Env:cloudEnv | out-null;
+    AttemptAzLogin $psCredential $RawCreds.tenantId $Env:cloudEnv
     Set-AzContext -Tenant $RawCreds.tenantId | out-null;
 }
 
@@ -35,6 +60,7 @@ if ($Env:cloudEnv -ne 'AzureCloud') {
 }
 
 Write-Output "Starting Deployment for Files in path: $Env:directory"
+$MaxRetries = 3;
 
 if (Test-Path -Path $Env:directory) {
     $totalFiles = 0;
@@ -48,12 +74,23 @@ if (Test-Path -Path $Env:directory) {
             $totalFailed++
             return
         }
-        Try {
-            New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -workspace $Env:workspaceName
+        $isSuccess = $false
+        $currentAttempt = 1
+        While (($currentAttempt -le $MaxRetries) -and (-not $isSuccess)) {
+            Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
+            $currentAttempt ++
+            Try {
+                New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -workspace $Env:workspaceName
+                $isSuccess = $true
+            }
+            Catch {        
+                Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
+                $isSuccess = $false
+            }
         }
-        Catch {        
+        if (-not $isSuccess) {
             $totalFailed++
-            Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
+            Write-Output "[Warning] Unable to deploy $CurrentFile. Deployment failed after $MaxRetries unsuccessful attempts."
         }
     }
     if ($totalFiles -gt 0 -and $totalFailed -gt 0) {
