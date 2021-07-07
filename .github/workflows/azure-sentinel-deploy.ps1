@@ -60,7 +60,6 @@ if ($Env:cloudEnv -ne 'AzureCloud') {
 }
 
 Write-Output "Starting Deployment for Files in path: $Env:directory"
-$MaxRetries = 3;
 
 if (Test-Path -Path $Env:directory) {
     $totalFiles = 0;
@@ -74,23 +73,12 @@ if (Test-Path -Path $Env:directory) {
             $totalFailed++
             return
         }
-        $isSuccess = $false
-        $currentAttempt = 1
-        While (($currentAttempt -le $MaxRetries) -and (-not $isSuccess)) {
-            Write-Output "Deploying $CurrentFile, attempt $currentAttempt of $MaxRetries"
-            $currentAttempt ++
-            Try {
-                New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -workspace $Env:workspaceName
-                $isSuccess = $true
-            }
-            Catch {        
-                Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
-                $isSuccess = $false
-            }
+        Try {
+            New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -workspace $Env:workspaceName
         }
-        if (-not $isSuccess) {
+        Catch {        
             $totalFailed++
-            Write-Output "[Warning] Unable to deploy $CurrentFile. Deployment failed after $MaxRetries unsuccessful attempts."
+            Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
         }
     }
     if ($totalFiles -gt 0 -and $totalFailed -gt 0) {
