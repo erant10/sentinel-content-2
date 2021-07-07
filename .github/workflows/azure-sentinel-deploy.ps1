@@ -9,7 +9,7 @@ function AttemptAzLogin($psCredential, $tenantId, $cloudEnv) {
             $stopTrying = $true
         }
         catch {
-            if ($retryCount -gt $maxLoginRetries) {
+            if ($retryCount -ge $maxLoginRetries) {
                 Write-Host "Login failed after $maxLoginRetries attempts."
                 $stopTrying = $true
             }
