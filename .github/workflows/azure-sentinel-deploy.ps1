@@ -1,6 +1,7 @@
 function AttemptAzLogin($psCredential, $tenantId, $cloudEnv) {
     $maxLoginRetries = 3
     $delayInSeconds = 30
+    $retryCount = 1
     $stopTrying = $false
     do {
         try {
