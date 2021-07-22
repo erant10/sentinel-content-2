@@ -1,55 +1,63 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "variables": {
-        "ruleId": "4c1ea13e-064f-448c-b917-a35b019c1b9e",
-        "ruleDisplayName": "Critical Threat Detected"
-    },
     "parameters": {
-        "location": {
-            "type": "string",
-            "minLength": 1,
-            "defaultValue": "[resourceGroup().location]",
-            "metadata": {
-                "description": "Resource group to deploy solution resources"
-            }
-        },
         "workspace": {
-            "type": "string",
-            "metadata": {
-                "description": "Workspace name for Log Analytics where Sentinel is setup"
-            }
+            "type": "String"
         }
     },
-    "functions": [],
     "resources": [
         {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/4c1ea13e-064f-448c-b917-a35b019c1b9e')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/4c1ea13e-064f-448c-b917-a35b019c1b9e')]",
             "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('ruleId'))]",
-            "apiVersion": "2020-01-01",
             "kind": "Scheduled",
-            "location": "[parameters('location')]",
-            "dependsOn": [],
+            "apiVersion": "2021-03-01-preview",
             "properties": {
+                "displayName": "Critical Threat Detected",
                 "description": "MPO rule description",
-                "displayName": "[variables('ruleDisplayName')]",
+                "severity": "Medium",
                 "enabled": false,
                 "query": "SecurityAlert | take 10",
                 "queryFrequency": "PT1H",
-                "queryPeriod": "P2DT1H30M",
-                "severity": "Medium",
+                "queryPeriod": "PT49H30M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": true,
-                "tactics": [ "InitialAccess", "Persistence" ],
-                "triggerOperator": "GreaterThan",
-                "triggerThreshold": 0
+                "tactics": [
+                    "InitialAccess",
+                    "Persistence"
+                ],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/BuiltInFusion')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/BuiltInFusion')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Fusion",
+            "apiVersion": "2021-03-01-preview",
+            "properties": {
+                "enabled": true,
+                "alertRuleTemplateName": "f71aba3d-28fb-450b-b192-4e76a83015c8"
             }
         }
-    ],
-    "outputs": {
-        "ruleId": {
-            "type": "string",
-            "value": "[variables('ruleId')]"
-        }
-    }
+    ]
 }
