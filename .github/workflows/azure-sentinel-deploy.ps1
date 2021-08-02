@@ -58,6 +58,7 @@ function IsValidTemplate($path) {
 Write-Host "Added / Modified: ${$Env:added_modified}"
 Write-Host "Removed: ${$Env:removed}"
 Write-Host "Renamed: ${$Env:renamed}"
+Write-Host "test: ${$Env:test}"
 
 # if ($Env:cloudEnv -ne 'AzureCloud') {
 #     Write-Output "Attempting Sign In to Azure Cloud"
