@@ -55,6 +55,7 @@ function IsValidTemplate($path) {
     }
 }
 
+Write-Host "cloudEnv: ${$Env:cloudEnv}" 
 Write-Host "Added / Modified: ${$Env:added_modified}"
 Write-Host "Removed: ${$Env:removed}"
 Write-Host "Renamed: ${$Env:renamed}"
