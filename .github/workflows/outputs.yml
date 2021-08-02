@@ -5,7 +5,7 @@ on:
 
 jobs:
   changedfiles:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Fetch changed files as json
       id: files
