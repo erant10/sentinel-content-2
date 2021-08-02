@@ -20,4 +20,4 @@ jobs:
         echo Removed: ${{ steps.files.outputs.removed }}
     - name: Print all
       run: |
-        echo All: ${{ steps.files.outputs.removed }}
+        echo All: ${{ steps.files.outputs.all }}
