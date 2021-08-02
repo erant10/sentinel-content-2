@@ -7,11 +7,12 @@ jobs:
   changedfiles:
     runs-on: windows-latest
     steps:
-    - name: Print changed files as json
+    - name: Fetch changed files as json
       id: files
       uses: jitterbit/get-changed-files@v1
       with:
         format: 'json'
+    - name: Print output
       run: |
         readarray -t removed_files <<<"$(jq -r '.[]' <<<'${{ steps.files.outputs.removed }}')"
         for removed_file in ${removed_files[@]}; do
