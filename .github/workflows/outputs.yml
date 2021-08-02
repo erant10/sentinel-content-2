@@ -18,6 +18,6 @@ jobs:
     - name: Print removed
       run: |
         echo Removed: ${{ steps.files.outputs.removed }}
-    - name: Print all
+    - name: Print renamed
       run: |
-        echo All: ${{ steps.files.outputs.all }}
+        echo renamed: ${{ steps.files.outputs.renamed }}
