@@ -55,38 +55,42 @@ function IsValidTemplate($path) {
     }
 }
 
-if ($Env:cloudEnv -ne 'AzureCloud') {
-    Write-Output "Attempting Sign In to Azure Cloud"
-    ConnectAzCloud
-}
+Write-Host "Added / Modified: ${$Env.added_modified}"
+Write-Host "Removed: ${$Env.removed}"
+Write-Host "Renamed: ${$Env.renamed}"
 
-Write-Output "Starting Deployment for Files in path: $Env:directory"
+# if ($Env:cloudEnv -ne 'AzureCloud') {
+#     Write-Output "Attempting Sign In to Azure Cloud"
+#     ConnectAzCloud
+# }
 
-if (Test-Path -Path $Env:directory) {
-    $totalFiles = 0;
-    $totalFailed = 0;
-    Get-ChildItem -Path $Env:directory -Recurse -Filter *.json |
-    ForEach-Object {
-        $CurrentFile = $_.FullName
-        $totalFiles ++
-        $isValid = IsValidTemplate $CurrentFile
-        if (-not $isValid) {
-            $totalFailed++
-            return
-        }
-        Try {
-            New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -workspace $Env:workspaceName
-        }
-        Catch {        
-            $totalFailed++
-            Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
-        }
-    }
-    if ($totalFiles -gt 0 -and $totalFailed -gt 0) {
-        $error = "$totalFailed of $totalFiles deployments failed."
-        Throw $error
-    }
-}
-else {
-    Write-Output "[Warning] $Env:directory not found. nothing to deploy"
-}
+# Write-Output "Starting Deployment for Files in path: $Env:directory"
+
+# if (Test-Path -Path $Env:directory) {
+#     $totalFiles = 0;
+#     $totalFailed = 0;
+#     Get-ChildItem -Path $Env:directory -Recurse -Filter *.json |
+#     ForEach-Object {
+#         $CurrentFile = $_.FullName
+#         $totalFiles ++
+#         $isValid = IsValidTemplate $CurrentFile
+#         if (-not $isValid) {
+#             $totalFailed++
+#             return
+#         }
+#         Try {
+#             New-AzResourceGroupDeployment -ResourceGroupName $Env:resourceGroupName -TemplateFile $CurrentFile -workspace $Env:workspaceName
+#         }
+#         Catch {        
+#             $totalFailed++
+#             Write-Output "[Warning] Failed to deploy $CurrentFile with error: $_"
+#         }
+#     }
+#     if ($totalFiles -gt 0 -and $totalFailed -gt 0) {
+#         $error = "$totalFailed of $totalFiles deployments failed."
+#         Throw $error
+#     }
+# }
+# else {
+#     Write-Output "[Warning] $Env:directory not found. nothing to deploy"
+# }
