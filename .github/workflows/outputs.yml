@@ -12,6 +12,9 @@ jobs:
       uses: jitterbit/get-changed-files@v1
       with:
         format: 'json'
-    - name: Print output
+    - name: Print added modified
       run: |
-        echo ${{ steps.files.outputs.all }}
+        echo Added: ${{ steps.files.outputs.added_modified  }}
+    - name: Print removed
+      run: |
+        echo Added: ${{ steps.files.outputs.removed }}
