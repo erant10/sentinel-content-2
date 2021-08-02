@@ -64,8 +64,6 @@ jobs:
       uses: jitterbit/get-changed-files@v1
       with:
         format: 'json'
-
-    - name: Set changed files as environment variable
       env: 
         added_modified: ${{ steps.files.outputs.added_modified }}
         removed: ${{ steps.files.outputs.removed }}
