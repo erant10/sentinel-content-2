@@ -64,11 +64,18 @@ jobs:
       uses: jitterbit/get-changed-files@v1
       with:
         format: 'json'
-      env: 
+
+    - name: Set changed files as environment variable
+      env:
         added_modified: ${{ steps.files.outputs.added_modified }}
         removed: ${{ steps.files.outputs.removed }}
         renamed: ${{ steps.files.outputs.renamed }}
         test: eran2
+      run: |
+        echo 'added_modified=${{ steps.files.outputs.added_modified }}' >> $GITHUB_ENV
+        echo 'removed=${{ steps.files.outputs.removed }}' >> $GITHUB_ENV
+        echo 'renamed=${{ steps.files.outputs.renamed }}' >> $GITHUB_ENV
+        echo 'test=eran2' >> $GITHUB_ENV
       
     - name: Read deployment script
       id: deploymentScript
