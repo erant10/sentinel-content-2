@@ -17,4 +17,7 @@ jobs:
         echo Added: ${{ steps.files.outputs.added_modified  }}
     - name: Print removed
       run: |
-        echo Added: ${{ steps.files.outputs.removed }}
+        echo Removed: ${{ steps.files.outputs.removed }}
+    - name: Print all
+      run: |
+        echo All: ${{ steps.files.outputs.removed }}
