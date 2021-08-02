@@ -67,9 +67,9 @@ jobs:
 
     - name: Save changed files to environment variable
       run: |
-        echo "added_modified=${{ steps.files.outputs.added_modified }}" >> GITHUB_ENV
-        echo "removed=${{ steps.files.outputs.removed }}" >> GITHUB_ENV
-        echo "renamed=${{ steps.files.outputs.renamed }}" >> GITHUB_ENV
+        echo "added_modified=${{ steps.files.outputs.added_modified }}" >> $GITHUB_ENV
+        echo "removed=${{ steps.files.outputs.removed }}" >> $GITHUB_ENV
+        echo "renamed=${{ steps.files.outputs.renamed }}" >> $GITHUB_ENV
       
     - name: Read deployment script
       id: deploymentScript
