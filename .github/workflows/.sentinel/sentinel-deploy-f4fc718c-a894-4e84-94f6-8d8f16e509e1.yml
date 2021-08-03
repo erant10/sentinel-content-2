@@ -1,0 +1,83 @@
+name: Deploy Content to Azure Sentinel
+on: 
+  push:
+    branches: [ main ]
+    paths:
+    - 'Detections/**'
+    - '.github/workflows/sentinel-deploy**'
+
+jobs:
+  deploy-content:
+    runs-on: windows-latest
+    env:
+      resourceGroupName: 'cac-test-rg'
+      workspaceName: 'cac-test-la'
+      directory: '${{ github.workspace }}/Detections'
+      cloudEnv: 'AzureCloud'
+      creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_f4fc718ca8944e8494f68d8f16e509e1 }}
+
+    steps:
+    # - name: Login to Azure (Attempt 1)
+    #   continue-on-error: true
+    #   id: login1
+    #   uses: azure/login@v1
+    #   if: ${{ env.cloudEnv == 'AzureCloud' }}
+    #   with:
+    #     creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_f4fc718ca8944e8494f68d8f16e509e1 }}
+    #     enable-AzPSSession: true
+
+    # - name: Wait 30 seconds if login attempt 1 failed
+    #   uses: juliangruber/sleep-action@v1
+    #   if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
+    #   with:
+    #     time: 30s
+    
+    # - name: Login to Azure (Attempt 2)
+    #   continue-on-error: true
+    #   id: login2
+    #   uses: azure/login@v1
+    #   if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
+    #   with:
+    #     creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_f4fc718ca8944e8494f68d8f16e509e1 }}
+    #     enable-AzPSSession: true
+
+    # - name: Wait 30 seconds if login attempt 2 failed
+    #   uses: juliangruber/sleep-action@v1
+    #   if: ${{ env.cloudEnv == 'AzureCloud' && steps.login2.outcome=='failure' }}
+    #   with:
+    #     time: 30s
+    
+    # - name: Login to Azure (Attempt 3)
+    #   continue-on-error: false
+    #   id: login3
+    #   uses: azure/login@v1
+    #   if: ${{ env.cloudEnv == 'AzureCloud' && steps.login2.outcome=='failure'  }}
+    #   with:
+    #     creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_f4fc718ca8944e8494f68d8f16e509e1 }}
+    #     enable-AzPSSession: true
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Fetch changed files
+      id: files
+      uses: jitterbit/get-changed-files@v1
+      with:
+        format: 'json'
+
+    - name: Read deployment script
+      id: deploymentScript
+      uses: juliangruber/read-file-action@v1
+      with:
+        path: '${{ github.workspace }}/.github/workflows/.sentinel/azure-sentinel-deploy.ps1'
+    
+    - name: Deploy Analytic Rules
+      uses: azure/powershell@v1
+      env:
+        added_modified: ${{ steps.files.outputs.added_modified }}
+        removed: ${{ steps.files.outputs.removed }}
+        renamed: ${{ steps.files.outputs.renamed }}
+      with:
+        azPSVersion: 'latest'
+        inlineScript: |
+          ${{ steps.deploymentScript.outputs.content }}
