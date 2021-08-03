@@ -70,7 +70,7 @@ jobs:
         echo 'added_modified=${{ steps.files.outputs.added_modified }}' >> $GITHUB_ENV
         echo 'removed=${{ steps.files.outputs.removed }}' >> $GITHUB_ENV
         echo 'renamed=${{ steps.files.outputs.renamed }}' >> $GITHUB_ENV
-        echo "test=eran2" >> $GITHUB_ENV
+        echo "::set-env name=TEST_RESULT::eran2"
       
     - name: Read deployment script
       id: deploymentScript
