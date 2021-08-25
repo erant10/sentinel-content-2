@@ -1,0 +1,59 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "parameters('templateSpecVersion')",
+    "parameters": {
+        "workbookId": {
+            "defaultValue": "[newGuid()]",
+            "type": "String"
+        },
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "variables": {
+        "parentResourceId": "[resourceId('Microsoft.Insights/workbooks', parameters('workbookId'))]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('workbookId')]",
+            "type": "Microsoft.Insights/workbooks",
+            "location": "[resourceGroup().location]",
+            "kind": "shared",
+            "apiVersion": "2018-06-17-preview",
+            "properties": {
+                "displayName": "[concat('Test workbook', ' - ', parameters('workbookId'))]",
+                "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":\"{\\\"json\\\":\\\"Hello World!\\\"}\",\"conditionalVisibility\":null}],\"isLocked\":false}",
+                "version": "1.0",
+                "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "category": "sentinel"
+            }
+        },
+        {
+            "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+            "apiVersion": "2021-03-01-preview",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',guid(variables('parentResourceId')))]",
+            "properties": {
+                "parentId": "[variables('parentResourceId')]",
+                "contentId": "[parameters('workbookId')]",
+                "kind": "Workbook",
+                "version": "1.0.0",
+                "source": {
+                    "kind": "Solution",
+                    "name": "Contoso Solution 1.0",
+                    "sourceId": "b688a130-76f4-4a07-bf57-762222a3cadf"
+                },
+                "author": {
+                    "name": "User Name",
+                    "email": "email@microsoft.com",
+                    "link": "https://www.microsoft.com/"
+                },
+                "support": {
+                    "tier": "Community",
+                    "name": "Microsoft",
+                    "email": "support@microsoft.com",
+                    "link": "https://support.microsoft.com/"
+                }
+            }
+        }
+    ]
+}
