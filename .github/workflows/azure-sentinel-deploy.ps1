@@ -4,7 +4,16 @@ $ResourceGroupName = $Env:resourceGroupName
 $WorkspaceName = $Env:workspaceName
 $Directory = $Env:directory
 $Creds = $Env:creds
-
+$contentTypes = $Env:contentTypes
+$contentTypeMapping = @{
+    "AnalyticsRule"=@("Microsoft.OperationalInsights/workspaces/providers/alertRules");
+    "AutomationRule"=@("Microsoft.OperationalInsights/workspaces/providers/automationRules");
+    "HuntingQuery"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
+    "Parser"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
+    "Playbook"=@("Microsoft.Web/connections", "Microsoft.Logic/workflows");
+    "Workbook"=@("Microsoft.Insights/workbooks");
+}
+$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
 $MaxRetries = 3
 $secondsBetweenAttempts = 5
 
@@ -76,6 +85,15 @@ function IsRetryable($deploymentName) {
     }
 }
 
+function IsValidContentType($path) {
+    $template = Get-Content $path | Out-String | ConvertFrom-Json
+    $isAllowedResources = $true
+    $template.resources | ForEach-Object { 
+        $isAllowedResources = $resourceTypes.contains($_.type) -and $isAllowedResources
+    }
+    return $isAllowedResources
+}
+
 function AttemptDeployment($path, $deploymentName) {
     $isValid = IsValidTemplate $path
     if (-not $isValid) {
@@ -88,7 +106,6 @@ function AttemptDeployment($path, $deploymentName) {
         $currentAttempt ++
         Try 
         {
-
             New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $path -workspace $workspaceName -ErrorAction Stop | Out-Host
             $isSuccess = $true
         }
@@ -132,7 +149,14 @@ function main() {
         $totalFailed = 0;
         Get-ChildItem -Path $Directory -Recurse -Filter *.json |
         ForEach-Object {
+            $path = $_.FullName
             $totalFiles ++
+            if (-not (IsValidContentType $path))
+            {
+                Write-Output "[Warning] Skipping deployment for $path. The file contains content that was not selected for deployment. Please remove the file or add content type to connection."
+                $totalFailed++
+                return
+            }
             $isSuccess = AttemptDeployment $_.FullName $_.Basename 
             if (-not $isSuccess) 
             {
