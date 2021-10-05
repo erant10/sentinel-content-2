@@ -5,8 +5,7 @@ on:
     paths:
     - 'Detections/**'
     - '.github/workflows/sentinel-deploy**'
-    paths-ignore:
-    - ""
+    - '!Detections/scheduled**'
 
 jobs:
   deploy-content:
