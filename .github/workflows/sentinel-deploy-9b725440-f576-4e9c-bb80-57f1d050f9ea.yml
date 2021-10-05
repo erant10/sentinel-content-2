@@ -6,7 +6,7 @@ on:
     - 'Detections/**'
     - '.github/workflows/sentinel-deploy**'
     paths-ignore:
-    - ""
+    - "Bla"
 
 jobs:
   deploy-content:
