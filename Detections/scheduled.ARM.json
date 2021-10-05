@@ -14,7 +14,7 @@
             "kind": "Scheduled",
             "apiVersion": "2021-03-01-preview",
             "properties": {
-                "displayName": "Critical Threat Detected",
+                "displayName": "Critical Threat Detected 1",
                 "description": "MPO rule description",
                 "severity": "Medium",
                 "enabled": false,
