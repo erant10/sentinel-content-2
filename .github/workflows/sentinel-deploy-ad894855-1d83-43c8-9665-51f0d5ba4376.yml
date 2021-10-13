@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
     paths:
-    - 'Detections/**'
+    - '**'
     - '.github/workflows/sentinel-deploy**'
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     env:
       resourceGroupName: 'eco-connector-test'
       workspaceName: 'ecocanarytest'
-      directory: '${{ github.workspace }}/Detections'
+      directory: '${{ github.workspace }}'
       cloudEnv: 'AzureCloud'
       creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_ad8948551d8343c8966551f0d5ba4376 }}
       contentTypes: 'AnalyticsRule,AutomationRule,HuntingQuery,Parser,Playbook,Workbook'
