@@ -12,7 +12,6 @@
             "location": "[resourceGroup().location]",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "apiVersion": "2020-08-01",
-            "etag": "*",
             "properties": {
                 "Category": "Hunting Queries",
                 "DisplayName": "Multiple large queries made by user",
@@ -34,9 +33,9 @@
                         "Name": "createdTimeUtc",
                         "Value": "2021-08-10T00:02:11.807Z"
                     }
-                ]
+                ],
+                "etag": "*",
             }
-
         }
     ]
 }
