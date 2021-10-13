@@ -14,7 +14,7 @@ $contentTypeMapping = @{
     "Workbook"=@("Microsoft.Insights/workbooks");
     "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
 }
-if (-not contentTypes.contains("Metadata")) {
+if (-not $contentTypes.contains("Metadata")) {
     $ContentTypes += "Metadata"
 }
 $resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
