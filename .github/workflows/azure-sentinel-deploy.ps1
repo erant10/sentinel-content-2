@@ -12,6 +12,10 @@ $contentTypeMapping = @{
     "Parser"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
     "Playbook"=@("Microsoft.Web/connections", "Microsoft.Logic/workflows");
     "Workbook"=@("Microsoft.Insights/workbooks");
+    "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
+}
+if (-not ($contentTypes.contains("Metadata"))) {
+    $contentTypes += "Metadata"
 }
 $resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
 $MaxRetries = 3
