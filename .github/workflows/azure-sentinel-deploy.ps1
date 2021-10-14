@@ -15,7 +15,7 @@ $contentTypeMapping = @{
     "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
 }
 if (-not $contentTypes.contains("Metadata")) {
-    $ContentTypes += "Metadata"
+    $ContentTypes += ",Metadata"
 }
 $resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
 $MaxRetries = 3
