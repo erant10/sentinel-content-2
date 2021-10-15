@@ -25,16 +25,6 @@
                         {
                             "conditionType": "Property",
                             "conditionProperties": {
-                                "propertyName": "IncidentRelatedAnalyticRuleIds",
-                                "operator": "Contains",
-                                "propertyValues": [
-                                    "/subscriptions/419581d6-4853-49bd-83b6-d94bb8a77887/resourceGroups/cac-test-rg/providers/Microsoft.OperationalInsights/workspaces/cac-test-la/providers/Microsoft.SecurityInsights/alertRules/8ee9c64a-fc2c-4410-be34-cba0e47aabf0"
-                                ]
-                            }
-                        },
-                        {
-                            "conditionType": "Property",
-                            "conditionProperties": {
                                 "propertyName": "IncidentTactics",
                                 "operator": "Contains",
                                 "propertyValues": [
