@@ -4,6 +4,7 @@ on:
     branches: [ main ]
     paths:
     - '**'
+    - '!.github/workflows'
     - '.github/workflows/sentinel-deploy-19c51fa3-7c4a-4c1b-9a8c-9991e88c2c62.yml'
 
 jobs:
