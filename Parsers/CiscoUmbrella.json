@@ -4,10 +4,6 @@
     "parameters": {
         "workspace": {
             "type": "string"
-        },
-        "location": {
-            "type": "string",
-            "default": "[resourceGroup().location]"
         }
     },
     "resources": [
@@ -15,7 +11,7 @@
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "apiVersion": "2020-08-01",
             "name": "[concat(parameters('workspace'), '/ASimDnsCiscoUmbrella')]",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "etag": "*",
                 "displayName": "Cisco Umbrella DNS Events",
