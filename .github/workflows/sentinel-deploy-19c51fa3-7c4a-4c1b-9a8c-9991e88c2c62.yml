@@ -67,7 +67,7 @@ jobs:
       with:
         path: '${{ github.workspace }}/.github/workflows/azure-sentinel-deploy.ps1'
     
-    - name: Deploy Content to Azure Sentinel (test)
+    - name: Deploy Content to Azure Sentinel
       uses: azure/powershell@v1
       with:
         azPSVersion: 'latest'
