@@ -98,7 +98,7 @@ function IsValidContentType($path) {
     $template = Get-Content $path | Out-String | ConvertFrom-Json
     $isAllowedResources = $true
     $template.resources | ForEach-Object { 
-        $isAllowedResources = $resourceTypes.contains($_.type.ToLower) -and $isAllowedResources
+        $isAllowedResources = $resourceTypes.contains($_.type.ToLower()) -and $isAllowedResources
     }
     return $isAllowedResources
 }
