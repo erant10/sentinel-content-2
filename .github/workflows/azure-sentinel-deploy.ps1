@@ -4,15 +4,15 @@ $ResourceGroupName = $Env:resourceGroupName
 $WorkspaceName = $Env:workspaceName
 $Directory = $Env:directory
 $Creds = $Env:creds
-$contentTypes = $Env:contentTypes
+$contentTypes = "AnalyticsRule,AutomationRule,HuntingQuery,Parser,Playbook,Workbook" # $Env:contentTypes
 $contentTypeMapping = @{
-    "AnalyticsRule"=@("microsoft.operationalinsights/workspaces/providers/alertrules", "microsoft.operationalinsights/workspaces/providers/alertrules/actions");
-    "AutomationRule"=@("microsoft.operationalinsights/workspaces/providers/automationrules");
-    "HuntingQuery"=@("microsoft.operationalinsights/workspaces/savedsearches");
-    "Parser"=@("microsoft.operationalinsights/workspaces/savedsearches");
-    "Playbook"=@("microsoft.web/connections", "microsoft.logic/workflows", "microsoft.web/customapis");
-    "Workbook"=@("microsoft.insights/workbooks");
-    "Metadata"=@("microsoft.operationalinsights/workspaces/providers/metadata");
+    "AnalyticsRule"=@("Microsoft.OperationalInsights/workspaces/providers/alertRules", "Microsoft.OperationalInsights/workspaces/providers/alertRules/actions");
+    "AutomationRule"=@("Microsoft.OperationalInsights/workspaces/providers/automationRules");
+    "HuntingQuery"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
+    "Parser"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
+    "Playbook"=@("Microsoft.Web/connections", "Microsoft.Logic/workflows", "Microsoft.Web/customApis");
+    "Workbook"=@("Microsoft.Insights/workbooks");
+    "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
 }
 if (-not ($contentTypes.contains("Metadata"))) {
     if ([string]::IsNullOrEmpty($contentTypes)) {
@@ -22,7 +22,7 @@ if (-not ($contentTypes.contains("Metadata"))) {
         $contentTypes += ",Metadata"
     }
 }
-$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
+$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] } | ForEach-Object { $_.ToLower() }
 $MaxRetries = 3
 $secondsBetweenAttempts = 5
 

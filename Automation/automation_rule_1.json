@@ -27,7 +27,7 @@
                                 "propertyName": "IncidentRelatedAnalyticRuleIds",
                                 "operator": "Contains",
                                 "propertyValues": [
-                                    "[concat(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'), 'Microsoft.SecurityInsights/alertRules/fcd7bae2-0354-454d-9884-18880ff95fe8')]"
+                                    "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/fcd7bae2-0354-454d-9884-18880ff95fe8')]"
                                 ]
                             }
                         },
