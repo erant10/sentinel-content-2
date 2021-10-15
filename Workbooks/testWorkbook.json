@@ -8,7 +8,7 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Insights/workbooks",
+            "type": "Microsoft.Insights/Workbooks",
             "name": "ced6128e-fdb6-4f33-adb1-60eaa69028f7",
             "location": "[resourceGroup().location]",
             "kind": "shared",

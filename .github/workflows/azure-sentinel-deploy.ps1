@@ -6,13 +6,13 @@ $Directory = $Env:directory
 $Creds = $Env:creds
 $contentTypes = $Env:contentTypes
 $contentTypeMapping = @{
-    "AnalyticsRule"=@("Microsoft.OperationalInsights/workspaces/providers/alertRules", "Microsoft.OperationalInsights/workspaces/providers/alertRules/actions");
-    "AutomationRule"=@("Microsoft.OperationalInsights/workspaces/providers/automationRules");
-    "HuntingQuery"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
-    "Parser"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
-    "Playbook"=@("Microsoft.Web/connections", "Microsoft.Logic/workflows", "Microsoft.Web/customApis");
-    "Workbook"=@("Microsoft.Insights/workbooks");
-    "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
+    "AnalyticsRule"=@("microsoft.operationalinsights/workspaces/providers/alertRules", "microsoft.operationalinsights/workspaces/providers/alertRules/actions");
+    "AutomationRule"=@("microsoft.operationalinsights/workspaces/providers/automationRules");
+    "HuntingQuery"=@("microsoft.operationalinsights/workspaces/savedSearches");
+    "Parser"=@("microsoft.operationalinsights/workspaces/savedSearches");
+    "Playbook"=@("microsoft.web/connections", "microsoft.logic/workflows", "microsoft.web/customapis");
+    "Workbook"=@("microsoft.insights/workbooks");
+    "Metadata"=@("microsoft.operationalinsights/workspaces/providers/metadata");
 }
 if (-not ($contentTypes.contains("Metadata"))) {
     if ([string]::IsNullOrEmpty($contentTypes)) {
@@ -98,7 +98,7 @@ function IsValidContentType($path) {
     $template = Get-Content $path | Out-String | ConvertFrom-Json
     $isAllowedResources = $true
     $template.resources | ForEach-Object { 
-        $isAllowedResources = $resourceTypes.contains($_.type) -and $isAllowedResources
+        $isAllowedResources = $resourceTypes.contains($_.type.ToLower) -and $isAllowedResources
     }
     return $isAllowedResources
 }
