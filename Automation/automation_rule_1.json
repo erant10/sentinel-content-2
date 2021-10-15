@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/automationRules/516b1bf3-2c94-4d3b-ae10-0cd1ed9b4348')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/516b1bf3-2c94-4d3b-ae10-0cd1ed9b4348')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
+            "kind": "Scheduled",
+            "apiVersion": "2019-01-01-preview",
+            "properties": {
+                "displayName": "Triaging",
+                "order": 2,
+                "triggeringLogic": {
+                    "isEnabled": true,
+                    "triggersOn": "Incidents",
+                    "triggersWhen": "Created",
+                    "conditions": [
+                        {
+                            "conditionType": "Property",
+                            "conditionProperties": {
+                                "propertyName": "IncidentRelatedAnalyticRuleIds",
+                                "operator": "Contains",
+                                "propertyValues": [
+                                    "[concat(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'), 'Microsoft.SecurityInsights/alertRules/fcd7bae2-0354-454d-9884-18880ff95fe8')]"
+                                ]
+                            }
+                        },
+                        {
+                            "conditionType": "Property",
+                            "conditionProperties": {
+                                "propertyName": "AccountName",
+                                "operator": "Contains",
+                                "propertyValues": [
+                                    "Manager"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "actions": [
+                    {
+                        "order": 1,
+                        "actionType": "ModifyProperties",
+                        "actionConfiguration": {
+                            "severity": null,
+                            "status": null,
+                            "classification": null,
+                            "classificationReason": null,
+                            "classificationComment": null,
+                            "owner": {
+                                "objectId": "99723f73-548c-47a2-8d3c-b273aca66c3d",
+                                "email": "davidshoval@microsoft.com",
+                                "assignedTo": "David Shoval",
+                                "userPrincipalName": "davidshoval@microsoft.com"
+                            },
+                            "labels": null
+                        }
+                    }
+                ],
+                "lastModifiedTimeUtc": "2021-10-05T07:39:03Z",
+                "createdTimeUtc": "2020-12-28T09:32:03Z",
+                "lastModifiedBy": {
+                    "objectId": "62527fbc-3b01-4d64-9998-ad95da9ee947",
+                    "email": "nchristis@microsoft.com",
+                    "name": "Naomi Christis",
+                    "userPrincipalName": "nchristis@microsoft.com"
+                },
+                "createdBy": {
+                    "objectId": "c23fd27d-6332-4ba9-9708-c6b1fdb240e5",
+                    "email": "Liat.Lisha@microsoft.com",
+                    "name": "Liat Lisha",
+                    "userPrincipalName": "lilisha@microsoft.com"
+                }
+            }
+        }
+    ]
+}

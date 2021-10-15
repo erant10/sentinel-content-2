@@ -1,0 +1,64 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/118cc3d5-6ab5-493a-a0a9-793c9dd09875')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/118cc3d5-6ab5-493a-a0a9-793c9dd09875')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Private Preview) Insider Risk Management: Sensitive Data Access Outside Organizational Geolocations",
+                "description": "Sensitive Data Access Outside Organziational Geolocations",
+                "severity": "High",
+                "enabled": true,
+                "query": "// Rule Name - (Private Preview) Insider Risk Management: Sensitive Data Access Outside Organizational Geolocations\r\n// Rule Description - Sensitive Data Access Outside Organziational Geolocations\r\n// Prerequisite 1: Onboard Azure Infomation Protection (https://docs.microsoft.com/en-us/azure/information-protection/requirements)\r\n// Prerequisite 2: Install AIP Unified Labeling Scanner (https://docs.microsoft.com/en-us/azure/information-protection/tutorial-install-scanner)\r\n// Prerequisite 3: Enable Azure Information Protection Connector (https://docs.microsoft.com/en-us/azure/sentinel/data-connectors-reference#azure-information-protection)\r\n// Prerequisite 4: Enable Azure Active Directory Connector (hhttps://docs.microsoft.com/en-us/azure/sentinel/connect-azure-active-directory)\r\nInformationProtectionLogs_CL\r\n| extend UserPrincipalName = UserId_s\r\n| where LabelName_s <> \"\"\r\n| join (SigninLogs) on UserPrincipalName\r\n| extend City = tostring(LocationDetails.city)\r\n// | where City <> \"New York\" // Configure Location Details within Organizational Requirements\r\n| extend State = tostring(LocationDetails.state)\r\n// | where State <> \"Texas\" // Configure Location Details within Organizational Requirements\r\n| extend Country_Region = tostring(LocationDetails.countryOrRegion)\r\n// | where Country_Region <> \"US\" // Configure Location Details within Organizational Requirements\r\n| summarize count() by UserPrincipalName, LabelName_s, Activity_s, City, State, Country_Region\r\n| sort by count_ desc\r\n| limit 250",
+                "queryFrequency": "PT6H",
+                "queryPeriod": "PT7H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "Activity": "Activity_s",
+                    "Where": "City"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "AadUserId",
+                                "columnName": "UserPrincipalName"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}
