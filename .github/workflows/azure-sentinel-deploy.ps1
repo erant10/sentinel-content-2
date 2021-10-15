@@ -22,7 +22,7 @@ if (-not ($contentTypes.contains("Metadata"))) {
         $contentTypes += ",Metadata"
     }
 }
-$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] } | ForEach-Object { $_.ToLower() }
+$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
 $MaxRetries = 3
 $secondsBetweenAttempts = 5
 
@@ -98,7 +98,7 @@ function IsValidContentType($path) {
     $template = Get-Content $path | Out-String | ConvertFrom-Json
     $isAllowedResources = $true
     $template.resources | ForEach-Object { 
-        $isAllowedResources = $resourceTypes.contains($_.type.ToLower()) -and $isAllowedResources
+        $isAllowedResources = $resourceTypes.contains($_.type) -and $isAllowedResources
     }
     return $isAllowedResources
 }
