@@ -14,15 +14,16 @@ $contentTypeMapping = @{
     "Workbook"=@("Microsoft.Insights/workbooks");
     "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
 }
-if (-not ($contentTypes.contains("Metadata"))) {
-    if ([string]::IsNullOrEmpty($contentTypes)) {
-        $contentTypes = "Metadata"
-    }
-     else {
-        $contentTypes += ",Metadata"
-    }
+
+if ([string]::IsNullOrEmpty($contentTypes)) {
+    $contentTypes = "AnalyticsRule,Metadata"
 }
-$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] }
+
+if (-not ($contentTypes.contains("Metadata"))) {
+    $contentTypes += ",Metadata"
+}
+
+$resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] } | ForEach-Object { $_.ToLower() }
 $MaxRetries = 3
 $secondsBetweenAttempts = 5
 
@@ -84,7 +85,7 @@ function IsValidTemplate($path) {
 }
 
 function IsRetryable($deploymentName) {
-    $retryableStatusCodes = "Conflict","TooManyRequests","InternalServerError"
+    $retryableStatusCodes = "Conflict","TooManyRequests","InternalServerError","DeploymentActive"
     Try {
         $deploymentResult = Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Stop
         return $retryableStatusCodes -contains $deploymentResult.StatusCode
@@ -98,12 +99,14 @@ function IsValidContentType($path) {
     $template = Get-Content $path | Out-String | ConvertFrom-Json
     $isAllowedResources = $true
     $template.resources | ForEach-Object { 
-        $isAllowedResources = $resourceTypes.contains($_.type) -and $isAllowedResources
+        $isAllowedResources = $resourceTypes.contains($_.type.ToLower()) -and $isAllowedResources
     }
     return $isAllowedResources
 }
 
 function AttemptDeployment($path, $deploymentName) {
+    Write-Host "[Info] Deploying $path with deployment name $deploymentName"
+	
     $isValid = IsValidTemplate $path
     if (-not $isValid) {
         return $false
@@ -115,7 +118,7 @@ function AttemptDeployment($path, $deploymentName) {
         $currentAttempt ++
         Try 
         {
-            New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $path -workspace $workspaceName -ErrorAction Stop | Out-Host
+            New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -TemplateFile $path -workspace $workspaceName -ErrorAction Stop | Out-Host
             $isSuccess = $true
         }
         Catch [Exception] 
@@ -143,6 +146,11 @@ function AttemptDeployment($path, $deploymentName) {
     return $isSuccess
 }
 
+function GenerateDeploymentName() {
+    $randomId = [guid]::NewGuid()
+    return "Sentinel_Deployment_$randomId"
+}
+
 function main() {
     if ($CloudEnv -ne 'AzureCloud') 
     {
@@ -162,11 +170,11 @@ function main() {
             $totalFiles ++
             if (-not (IsValidContentType $path))
             {
-                Write-Output "[Warning] Skipping deployment for $path. The file contains content that was not selected for deployment. Please remove the file or add content type to connection."
-                $totalFailed++
+                Write-Output "[Warning] Skipping deployment for $path. The file contains content that was not selected for deployment. Please add content type to connection if you want this file to be deployed."
                 return
             }
-            $isSuccess = AttemptDeployment $_.FullName $_.Basename 
+			$deploymentName = GenerateDeploymentName
+            $isSuccess = AttemptDeployment $_.FullName $deploymentName 
             if (-not $isSuccess) 
             {
                 $totalFailed++
