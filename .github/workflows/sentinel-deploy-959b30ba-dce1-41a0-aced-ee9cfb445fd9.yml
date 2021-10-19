@@ -1,9 +1,20 @@
 name: Deploy Content to cicd-test-la [959b30ba-dce1-41a0-aced-ee9cfb445fd9]
+# Note: This workflow will deploy everything in the root directory.
+# To deploy content only from a specific path (for example SentinelContent):
+#   1. Add the target path to the "paths" property like such
+#    paths:
+#    - 'SentinelContent/**'
+#    - '!.github/workflows/**'
+#    - '.github/workflows/sentinel-deploy-959b30ba-dce1-41a0-aced-ee9cfb445fd9.yml'
+#   2. Append the path to the directory environment variable below
+#       directory: '${{ github.workspace }}/SentinelContent'
+
 on: 
   push:
     branches: [ main ]
     paths:
     - '**'
+    - '!.github/workflows/**'  # this filter prevents other workflow changes from triggering this workflow
     - '.github/workflows/sentinel-deploy-959b30ba-dce1-41a0-aced-ee9cfb445fd9.yml'
 
 jobs:
@@ -15,7 +26,7 @@ jobs:
       directory: '${{ github.workspace }}'
       cloudEnv: 'AzurePPE'
       creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_959b30badce141a0acedee9cfb445fd9 }}
-      contentTypes: 'Workbook'
+      contentTypes: 'Workbook,AnalyticsRule'
 
     steps:
     - name: Login to Azure (Attempt 1)
