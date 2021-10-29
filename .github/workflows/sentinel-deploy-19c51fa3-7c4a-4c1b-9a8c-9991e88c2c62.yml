@@ -1,10 +1,20 @@
 name: Deploy Content to sentineleco-canarytest-law-eus2euap [19c51fa3-7c4a-4c1b-9a8c-9991e88c2c62]
+# Note: This workflow will deploy everything in the root directory.
+# To deploy content only from a specific path (for example SentinelContent):
+#   1. Add the target path to the "paths" property like such
+#    paths:
+#    - 'SentinelContent/**'
+#    - '!.github/workflows/**'
+#    - '.github/workflows/sentinel-deploy-19c51fa3-7c4a-4c1b-9a8c-9991e88c2c62.yml'
+#   2. Append the path to the directory environment variable below
+#       directory: '${{ github.workspace }}/SentinelContent'
+
 on: 
   push:
     branches: [ main ]
     paths:
     - '**'
-    - '!.github/workflows/**'
+    - '!.github/workflows/**'  # this filter prevents other workflow changes from triggering this workflow
     - '.github/workflows/sentinel-deploy-19c51fa3-7c4a-4c1b-9a8c-9991e88c2c62.yml'
 
 jobs:
@@ -16,7 +26,7 @@ jobs:
       directory: '${{ github.workspace }}'
       cloudEnv: 'AzureCloud'
       creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_19c51fa37c4a4c1b9a8c9991e88c2c62 }}
-      contentTypes: 'AnalyticsRule,AutomationRule,HuntingQuery,Parser,Playbook,Workbook'
+      contentTypes: 'Parser,Playbook,Workbook'
 
     steps:
     - name: Login to Azure (Attempt 1)
