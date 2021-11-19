@@ -40,8 +40,7 @@ jobs:
 
     - name: Wait 30 seconds if login attempt 1 failed
       if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
-      shell: pwsh
-      run: Start-Sleep -s 30
+      run: powershell Start-Sleep -s 30
     
     - name: Login to Azure (Attempt 2)
       continue-on-error: true
@@ -54,8 +53,7 @@ jobs:
 
     - name: Wait 30 seconds if login attempt 2 failed
       if: ${{ env.cloudEnv == 'AzureCloud' && steps.login2.outcome=='failure' }}
-      shell: pwsh
-      run: Start-Sleep -s 30
+      run: powershell Start-Sleep -s 30
     
     - name: Login to Azure (Attempt 3)
       continue-on-error: false
