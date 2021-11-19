@@ -39,9 +39,9 @@ jobs:
         enable-AzPSSession: true
 
     - name: Wait 30 seconds if login attempt 1 failed
+      if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
       run: Start-Sleep -s 30
       shell: powershell
-      if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
     
     - name: Login to Azure (Attempt 2)
       continue-on-error: true
@@ -53,9 +53,9 @@ jobs:
         enable-AzPSSession: true
 
     - name: Wait 30 seconds if login attempt 2 failed
+      if: ${{ env.cloudEnv == 'AzureCloud' && steps.login2.outcome=='failure' }}
       run: Start-Sleep -s 30
       shell: powershell
-      if: ${{ env.cloudEnv == 'AzureCloud' && steps.login2.outcome=='failure' }}
     
     - name: Login to Azure (Attempt 3)
       continue-on-error: false
