@@ -24,7 +24,7 @@ jobs:
       resourceGroupName: 'newecotestrg2'
       workspaceName: 'cicd-test-la'
       directory: '${{ github.workspace }}'
-      cloudEnv: 'AzurePPE'
+      cloudEnv: 'AzureCloud'
       creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_38f74bbf7e5c4cf093cd674d920273ba }}
       contentTypes: 'Parser'
 
@@ -35,7 +35,7 @@ jobs:
       uses: azure/login@v1
       if: ${{ env.cloudEnv == 'AzureCloud' }}
       with:
-        creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_38f74bbf7e5c4cf093cd674d920273ba-1 }}
+        creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_38f74bbf7e5c4cf093cd674d920273ba }}
         enable-AzPSSession: true
 
     - name: Wait 30 seconds if login attempt 1 failed
@@ -48,7 +48,7 @@ jobs:
       uses: azure/login@v1
       if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
       with:
-        creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_38f74bbf7e5c4cf093cd674d920273ba-1 }}
+        creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_38f74bbf7e5c4cf093cd674d920273ba }}
         enable-AzPSSession: true
 
     - name: Wait 30 seconds if login attempt 2 failed
