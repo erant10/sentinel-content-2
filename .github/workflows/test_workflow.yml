@@ -3,7 +3,7 @@ name: Test Workflow Run Trigger
 on:
   workflow_run:
     workflows:
-      - Deploy Content to cicd-test-la [38f74bbf-7e5c-4cf0-93cd-674d920273ba]
+      - Preflight
     types:
       - completed
       
