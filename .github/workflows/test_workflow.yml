@@ -18,5 +18,5 @@ jobs:
         with:
           github-token: ${{ github.token }}
           ms-teams-webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
-          notification-summary: Workflow Run Failed On GitHub. ${{ github.event.workflow_run.workflow.url }}
+          notification-summary: Workflow Run Failed On GitHub. ${{ github.event.workflow.url }}
           notification-color: dc3545 
