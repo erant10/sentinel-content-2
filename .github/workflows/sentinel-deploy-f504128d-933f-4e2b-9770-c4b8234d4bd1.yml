@@ -26,7 +26,7 @@ jobs:
       directory: '${{ github.workspace }}'
       cloudEnv: 'AzurePPE'
       creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_f504128d933f4e2b9770c4b8234d4bd1 }}
-      contentTypes: 'Parser'
+      contentTypes: 'Parser,HuntingQuery'
 
     steps:
     - name: Login to Azure (Attempt 1)
@@ -39,10 +39,8 @@ jobs:
         enable-AzPSSession: true
 
     - name: Wait 30 seconds if login attempt 1 failed
-      uses: juliangruber/sleep-action@v1
       if: ${{ env.cloudEnv == 'AzureCloud' && steps.login1.outcome=='failure' }}
-      with:
-        time: 30s
+      run: powershell Start-Sleep -s 30
     
     - name: Login to Azure (Attempt 2)
       continue-on-error: true
@@ -54,10 +52,8 @@ jobs:
         enable-AzPSSession: true
 
     - name: Wait 30 seconds if login attempt 2 failed
-      uses: juliangruber/sleep-action@v1
       if: ${{ env.cloudEnv == 'AzureCloud' && steps.login2.outcome=='failure' }}
-      with:
-        time: 30s
+      run: powershell Start-Sleep -s 30
     
     - name: Login to Azure (Attempt 3)
       continue-on-error: false
@@ -70,16 +66,10 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v1
-
-    - name: Read deployment script
-      id: deploymentScript
-      uses: juliangruber/read-file-action@v1
-      with:
-        path: '${{ github.workspace }}/.github/workflows/azure-sentinel-deploy.ps1'
     
     - name: Deploy Content to Azure Sentinel
       uses: azure/powershell@v1
       with:
         azPSVersion: 'latest'
         inlineScript: |
-          ${{ steps.deploymentScript.outputs.content }}
+          ${{ github.workspace }}//.github/workflows/azure-sentinel-deploy.ps1
