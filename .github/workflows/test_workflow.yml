@@ -2,22 +2,22 @@ name: Test Workflow Run Trigger
 
 on:
   workflow_run:
-    workflows: 
+    workflows:
       - Deploy Content to cicd-test-la [38f74bbf-7e5c-4cf0-93cd-674d920273ba]
     types:
       - completed
-
+      
 jobs:
-  on-success:
+  log-result:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Log Success 
         run: echo "conclusion:" ${{ github.event.workflow_run_conclusion }}"
   
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - name: Log Faliure 
-        run: echo "conclusion:" ${{ github.event.workflow_run_conclusion }}"
+#   on-failure:
+#     runs-on: ubuntu-latest
+#     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+#     steps:
+#       - name: Log Faliure 
+#         run: echo "conclusion:" ${{ github.event.workflow_run_conclusion }}"
