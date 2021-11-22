@@ -9,15 +9,15 @@ on:
 
 jobs:
   on-success:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Log Success 
-        run: echo ${{ github.event.workflow_run }}
+        run: echo "conclusion:" ${{ github.event.workflow_run_conclusion }}"
   
   on-failure:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     steps:
       - name: Log Faliure 
-        run: echo ${{ github.event.workflow_run }}
+        run: echo "conclusion:" ${{ github.event.workflow_run_conclusion }}"
