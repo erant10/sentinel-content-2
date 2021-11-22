@@ -8,16 +8,15 @@ on:
       - completed
       
 jobs:
-  on-success:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    steps:
-      - name: Log Success 
-        run: echo "Success"
-  
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     steps:
-      - name: Log Faliure 
-        run: echo "Faliure"
+      - name: Send Teams Message if failed
+        uses: jdcargile/ms-teams-notification@v1.3
+        if: ${{ always() && steps.deploy.outcome=='failure' }}
+        with:
+          github-token: ${{ github.token }}
+          ms-teams-webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
+          notification-summary: Workflow Run Failed. ${{ github.event.workflow_run.workflow.url }}
+          notification-color: dc3545 
