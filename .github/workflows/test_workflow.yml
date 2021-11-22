@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Send Teams Message if failed
         uses: jdcargile/ms-teams-notification@v1.3
-        if: ${{ always() && steps.deploy.outcome=='failure' }}
+        if: ${{ always() && github.event.workflow_run.conclusion == 'failure' }}
         with:
           github-token: ${{ github.token }}
           ms-teams-webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
