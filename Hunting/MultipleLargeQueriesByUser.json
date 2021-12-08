@@ -14,7 +14,7 @@
             "apiVersion": "2020-08-01",
             "properties": {
                 "Category": "Hunting Queries",
-                "DisplayName": "Multiple large queries made by user 1",
+                "DisplayName": "Multiple large queries made by user 2",
                 "Query": "let UI_apps = dynamic(['ASI_Portal','AzureMonitorLogsConnector','AppAnalytics']);\r\n  let threshold = 3;\r\n  LAQueryLogs\r\n  | where (ResponseRowCount == 10001 and RequestClientApp in(UI_apps)) or (ResponseRowCount > 10001 and RequestClientApp !in(UI_apps))\r\n  | summarize count() by AADEmail\r\n  | where count_ > threshold\r\n  | join kind=rightsemi (\r\n  LAQueryLogs\r\n  | where (ResponseRowCount == 10001 and RequestClientApp in(UI_apps)) or (ResponseRowCount > 10001 and RequestClientApp !in(UI_apps)))\r\n  on AADEmail\r\n  | extend timestamp = TimeGenerated, AccountCustomEntity = AADEmail",
                 "Tags": [
                     {
