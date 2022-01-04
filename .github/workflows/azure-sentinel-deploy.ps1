@@ -184,20 +184,27 @@ function main() {
         Get-ChildItem -Path $Directory -Recurse -Filter *.json |
         ForEach-Object {
             $path = $_.FullName
-            $totalFiles ++
-            $templateObject = Get-Content $path | Out-String | ConvertFrom-Json
-            if (-not (IsValidResourceType $templateObject))
-            {
-                Write-Output "[Warning] Skipping deployment for $path. The file contains resources for content that was not selected for deployment. Please add content type to connection if you want this file to be deployed."
-                return
+	        try {
+	            $totalFiles ++
+                $templateObject = Get-Content $path | Out-String | ConvertFrom-Json
+                if (-not (IsValidResourceType $templateObject))
+                {
+                    Write-Output "[Warning] Skipping deployment for $path. The file contains resources for content that was not selected for deployment. Please add content type to connection if you want this file to be deployed."
+                    return
+                }
+                $deploymentName = GenerateDeploymentName
+                $isSuccess = AttemptDeployment $_.FullName $deploymentName $templateObject
+                if (-not $isSuccess) 
+                {
+                    $totalFailed++
+                }
             }
-			$deploymentName = GenerateDeploymentName
-            $isSuccess = AttemptDeployment $_.FullName $deploymentName $templateObject
-            if (-not $isSuccess) 
-            {
+	        catch {
                 $totalFailed++
+                Write-Host "[Error] An error occurred while trying to deploy file $path. Exception details: $_"
+                Write-Host $_.ScriptStackTrace
             }
-        }
+	    }
         if ($totalFiles -gt 0 -and $totalFailed -gt 0) 
         {
             $err = "$totalFailed of $totalFiles deployments failed."
