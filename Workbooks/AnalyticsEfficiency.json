@@ -3,7 +3,7 @@
     "parameters": {
       "workbookDisplayName": {
         "type": "string",
-        "defaultValue": "Analytics Efficiency - CyberSecuritySoc",
+        "defaultValue": "Analytics Efficiency - CyberSecuritySoc2",
         "metadata": {
           "description": "The friendly name for the workbook that is used in the Gallery or Saved List.  This name must be unique within a resource group."
         }
@@ -24,7 +24,7 @@
       },
       "workbookId": {
         "type": "string",
-        "defaultValue": "[newGuid()]",
+        "defaultValue": "3c5f9029-e8ea-4c4a-856a-9c0b1253e0a9",
         "metadata": {
           "description": "The unique guid for this workbook instance"
         }
