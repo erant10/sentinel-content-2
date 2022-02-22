@@ -12,7 +12,6 @@ $contentTypeMapping = @{
     "Parser"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
     "Playbook"=@("Microsoft.Web/connections", "Microsoft.Logic/workflows", "Microsoft.Web/customApis");
     "Workbook"=@("Microsoft.Insights/workbooks");
-    "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
 }
 $sourceControlId = $Env:sourceControlId 
 $githubAuthToken = $Env:githubAuthToken
@@ -22,13 +21,60 @@ $manualDeployment = $Env:manualDeployment
 $csvPath = ".github\workflows\.sentinel\tracking_table_$sourceControlId.csv"
 $global:localCsvTablefinal = @{}
 
-if ([string]::IsNullOrEmpty($contentTypes)) {
-    $contentTypes = "AnalyticsRule,Metadata"
+$guidPattern = '(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)'
+$namePattern = '([-\w\._\(\)]+)'
+$sentinelResourcePatterns = @{
+    "AnalyticsRule" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/providers/Microsoft.SecurityInsights/alertRules/$namePattern"
+    "AutomationRule" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/providers/Microsoft.SecurityInsights/automationRules/$namePattern"
+    "HuntingQuery" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/savedSearches/$namePattern"
+    "Parser" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/savedSearches/$namePattern"
+    "Playbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Logic/workflows/$namePattern",
+    "Workbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Insights/workbooks/$namePattern"
 }
 
-if (-not ($contentTypes.contains("Metadata"))) {
-    $contentTypes += ",Metadata"
+if ([string]::IsNullOrEmpty($contentTypes)) {
+    $contentTypes = "AnalyticsRule"
 }
+
+$metadataFilePath = ".github\workflows\.sentinel\metadata.json"
+@"
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "parentResourceId": {
+            "type": "string"
+        },
+        "kind": {
+            "type": "string"
+        },
+        "sourceControlId": {
+            "type": "string"
+        },
+        "workspace": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "metadataName": "[guid(parameters('parentResourceId'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+            "apiVersion": "2021-03-01-preview",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('metadataName'))]",
+            "properties": {
+                "parentId": "[parameters('parentResourceId')]",
+                "kind": "[parameters('kind')]",
+                "source": {
+                    "kind": "SourceRepository",
+                    "sourceId": "[parameters('sourceControlId')]"
+                }
+            }
+        }
+    ]
+}
+"@ | Out-File -FilePath $metadataFilePath 
 
 $resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] } | ForEach-Object { $_.ToLower() }
 $MaxRetries = 3
@@ -215,6 +261,38 @@ function IsRetryable($deploymentName) {
     }
 }
 
+function GetContentKinds($resource) {
+    return $sentinelResourcePatterns.Keys | where $resource -match $sentinelResourcePatterns[$kind]
+}
+
+function ToContentKind($contentKinds, $resource) {
+     if ($contentKinds.Count -eq 1) {
+        return $contentKinds[0] 
+     }
+     if $contentKinds.Contains('HuntingQuery''Parser') {
+
+     }
+}
+
+function DeployMetadata($deploymentName, $resourceGroupName, $templateObject) {
+     Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Ignore | ForEach-Object {
+         $sentinelContentKinds = GetContentKinds $_.TargetResource
+        if ($sentinelContentKinds.Count -gt 0) {
+            # sentinel resources detected, deploy a new metadata item for each one
+            
+            $sentinelContentKinds | Where {  } | ForEach {
+
+            }
+            New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath 
+                -parentResourceId $_.TargetResource
+                -kind ToContentKind $sentinelContentKinds $templateObject
+                -sourceControlId $sourceControlId
+                -workspace $workspaceName 
+                -ErrorAction Stop | Out-Host
+        }
+    }
+}
+
 function IsValidResourceType($template) {
     try {
         $isAllowedResources = $true
@@ -255,6 +333,7 @@ function AttemptDeployment($path, $deploymentName, $templateObject) {
             {
                 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -TemplateFile $path -ErrorAction Stop | Out-Host
             }
+            DeployMetadata($deploymentName)
             
             $isSuccess = $true
         }
