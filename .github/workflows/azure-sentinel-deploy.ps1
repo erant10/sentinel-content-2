@@ -268,7 +268,7 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
         $deploymentInfo = Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Ignore
     }
     catch {
-        Write-Host "[Warning] Unable to fetch deployment info for $deploymentName, no metadata was created for the resources in the file"
+        Write-Host "[Warning] Unable to fetch deployment info for $deploymentName, no metadata was created for the resources in the file. Error: $_"
         return
     }
     Write-Host "[Debug] $deploymentInfo"
@@ -291,7 +291,7 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
                 Write-Host "[Info] Created metadata metadata for $contentKind with oparent resource id $resource"
             }
             catch {
-                Write-Host "[Warning] Failed to deploy metadata for $contentKind with oparent resource id $resource"
+                Write-Host "[Warning] Failed to deploy metadata for $contentKind with oparent resource id $resource with error $_"
             }
         }
     }
