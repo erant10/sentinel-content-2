@@ -336,7 +336,7 @@ function AttemptDeployment($path, $deploymentName, $templateObject) {
             {
                 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -TemplateFile $path -ErrorAction Stop | Out-Host
             }
-            DeployMetadata($deploymentName)
+            DeployMetadata $deploymentName $ResourceGroupName $templateObject
             
             $isSuccess = $true
         }

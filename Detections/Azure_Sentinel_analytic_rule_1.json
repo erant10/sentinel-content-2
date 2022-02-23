@@ -15,7 +15,7 @@
             "apiVersion": "2021-09-01-preview",
             "properties": {
                 "alertRuleTemplateName": "2d3e33c6-d8e6-4b51-92d6-dbe8bd9efb05",
-                "displayName": "(Preview) Anomalous Azure AD sign-in sessions 2",
+                "displayName": "(Preview) Anomalous Azure AD sign-in sessions 3",
                 "enabled": true,
                 "tactics": [
                     "InitialAccess"
