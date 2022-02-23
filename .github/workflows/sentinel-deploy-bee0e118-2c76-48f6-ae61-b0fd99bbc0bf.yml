@@ -27,6 +27,7 @@ jobs:
       cloudEnv: 'AzureCloud'
       creds: ${{ secrets.AZURE_SENTINEL_CREDENTIALS_bee0e1182c7648f6ae61b0fd99bbc0bf }}
       contentTypes: 'AnalyticsRule,AutomationRule,HuntingQuery,Parser,Workbook,Playbook'
+      sourceControlId: 'bee0e118-2c76-48f6-ae61-b0fd99bbc0bf'
 
     steps:
     - name: Login to Azure (Attempt 1)

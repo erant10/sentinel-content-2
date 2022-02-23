@@ -12,16 +12,63 @@ $contentTypeMapping = @{
     "Parser"=@("Microsoft.OperationalInsights/workspaces/savedSearches");
     "Playbook"=@("Microsoft.Web/connections", "Microsoft.Logic/workflows", "Microsoft.Web/customApis");
     "Workbook"=@("Microsoft.Insights/workbooks");
-    "Metadata"=@("Microsoft.OperationalInsights/workspaces/providers/metadata");
+}
+$sourceControlId = $Env:sourceControlId 
+
+$guidPattern = '(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)'
+$namePattern = '([-\w\._\(\)]+)'
+$sentinelResourcePatterns = @{
+    "AnalyticsRule" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/providers/Microsoft.SecurityInsights/alertRules/$namePattern"
+    "AutomationRule" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/providers/Microsoft.SecurityInsights/automationRules/$namePattern"
+    "HuntingQuery" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/savedSearches/$namePattern"
+    "Parser" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/savedSearches/$namePattern"
+    "Playbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Logic/workflows/$namePattern"
+    "Workbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Insights/workbooks/$namePattern"
 }
 
 if ([string]::IsNullOrEmpty($contentTypes)) {
-    $contentTypes = "AnalyticsRule,Metadata"
+    $contentTypes = "AnalyticsRule"
 }
 
-if (-not ($contentTypes.contains("Metadata"))) {
-    $contentTypes += ",Metadata"
+$metadataFilePath = ".github\workflows\.sentinel\metadata.json"
+@"
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "parentResourceId": {
+            "type": "string"
+        },
+        "kind": {
+            "type": "string"
+        },
+        "sourceControlId": {
+            "type": "string"
+        },
+        "workspace": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "metadataName": "[guid(parameters('parentResourceId'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+            "apiVersion": "2021-03-01-preview",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('metadataName'))]",
+            "properties": {
+                "parentId": "[parameters('parentResourceId')]",
+                "kind": "[parameters('kind')]",
+                "source": {
+                    "kind": "SourceRepository",
+                    "sourceId": "[parameters('sourceControlId')]"
+                }
+            }
+        }
+    ]
 }
+"@ | Out-File -FilePath $metadataFilePath 
 
 $resourceTypes = $contentTypes.Split(",") | ForEach-Object { $contentTypeMapping[$_] } | ForEach-Object { $_.ToLower() }
 $MaxRetries = 3
@@ -71,6 +118,53 @@ function ConnectAzCloud {
 
     AttemptAzLogin $psCredential $RawCreds.tenantId $CloudEnv
     Set-AzContext -Tenant $RawCreds.tenantId | out-null;
+}
+
+function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObject) {
+    $deploymentInfo = $null
+    try {
+        $deploymentInfo = Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Ignore
+    }
+    catch {
+        Write-Host "[Warning] Unable to fetch deployment info for $deploymentName, no metadata was created for the resources in the file"
+    }
+    $deploymentInfo | ForEach-Object {
+            $sentinelContentKinds = GetContentKinds $_.TargetResource
+            $contentKind = ToContentKind $sentinelContentKinds $templateObject
+            if ($null -ne $contentKind) {
+                # sentinel resources detected, deploy a new metadata item for each one
+                try {
+                    New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath 
+                        -parentResourceId $_.TargetResource
+                        -kind $contentKind
+                        -sourceControlId $sourceControlId
+                        -workspace $workspaceName 
+                        -ErrorAction Stop | Out-Host
+                    Write-Host "Created metadata metadata for $contentKind with oparent resource id ${$_.TargetResource}"
+                }
+                catch {
+                    Write-Host "[Warning] Failed to deploy metadata for $contentKind with oparent resource id ${$_.TargetResource}"
+                }
+            }
+        }
+     
+}
+
+function GetContentKinds($resource) {
+    return $sentinelResourcePatterns.Keys | Where-Object { $resource -match $sentinelResourcePatterns[$kind] }
+}
+
+function ToContentKind($contentKinds, $resource, $templateObject) {
+    if ($contentKinds.Count -eq 1) {
+       return $contentKinds[0] 
+    }
+    if ($resource.Contains('savedSearches')) {
+       if ($templateObject.resources.properties.Category -eq "Hunting Queries") {
+           return "HuntingQuery"
+       }
+       return "Parser"
+    }
+    return $null
 }
 
 function IsValidTemplate($path, $templateObject) {
@@ -135,7 +229,8 @@ function AttemptDeployment($path, $deploymentName, $templateObject) {
             {
                 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -TemplateFile $path -ErrorAction Stop | Out-Host
             }
-            
+            AttemptDeployMetadata $deploymentName $ResourceGroupName $templateObject
+
             $isSuccess = $true
         }
         Catch [Exception] 

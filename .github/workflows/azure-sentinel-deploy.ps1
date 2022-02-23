@@ -262,21 +262,34 @@ function IsRetryable($deploymentName) {
 }
 
 
-function DeployMetadata($deploymentName, $resourceGroupName, $templateObject) {
-     Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Ignore | ForEach-Object {
-         $sentinelContentKinds = GetContentKinds $_.TargetResource
-         $contentKind = ToContentKind $sentinelContentKinds $templateObject
-        if ($null -ne $contentKind) {
-            # sentinel resources detected, deploy a new metadata item for each one
-            Write-Host "Creating metadata for $contentKind with oparent resource id ${$_.TargetResource}"
-            New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath 
-                -parentResourceId $_.TargetResource
-                -kind $contentKind
-                -sourceControlId $sourceControlId
-                -workspace $workspaceName 
-                -ErrorAction Stop | Out-Host
-        }
+function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObject) {
+    $deploymentInfo = $null
+    try {
+        $deploymentInfo = Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Ignore
     }
+    catch {
+        Write-Host "[Warning] Unable to fetch deployment info for $deploymentName, no metadata was created for the resources in the file"
+    }
+    $deploymentInfo | ForEach-Object {
+            $sentinelContentKinds = GetContentKinds $_.TargetResource
+            $contentKind = ToContentKind $sentinelContentKinds $templateObject
+            if ($null -ne $contentKind) {
+                # sentinel resources detected, deploy a new metadata item for each one
+                try {
+                    New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath 
+                        -parentResourceId $_.TargetResource
+                        -kind $contentKind
+                        -sourceControlId $sourceControlId
+                        -workspace $workspaceName 
+                        -ErrorAction Stop | Out-Host
+                    Write-Host "Created metadata metadata for $contentKind with oparent resource id ${$_.TargetResource}"
+                }
+                catch {
+                    Write-Host "[Warning] Failed to deploy metadata for $contentKind with oparent resource id ${$_.TargetResource}"
+                }
+            }
+        }
+     
 }
 
 function GetContentKinds($resource) {
@@ -336,7 +349,7 @@ function AttemptDeployment($path, $deploymentName, $templateObject) {
             {
                 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -TemplateFile $path -ErrorAction Stop | Out-Host
             }
-            DeployMetadata $deploymentName $ResourceGroupName $templateObject
+            AttemptDeployMetadata $deploymentName $ResourceGroupName $templateObject
             
             $isSuccess = $true
         }
