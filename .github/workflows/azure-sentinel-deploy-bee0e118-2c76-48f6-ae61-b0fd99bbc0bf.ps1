@@ -127,10 +127,15 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
     }
     catch {
         Write-Host "[Warning] Unable to fetch deployment info for $deploymentName, no metadata was created for the resources in the file"
+        return
     }
+    Write-Host "[Debug] $deploymentInfo"
     $deploymentInfo | ForEach-Object {
+            Write-Host "[Debug] getting content kinds for $($_.TargetResource)"
             $sentinelContentKinds = GetContentKinds $_.TargetResource
+            Write-Host "[Debug] sentinelContentKinds $sentinelContentKinds"
             $contentKind = ToContentKind $sentinelContentKinds $templateObject
+            Write-Host "[Debug] contentKind $contentKind"
             if ($null -ne $contentKind) {
                 # sentinel resources detected, deploy a new metadata item for each one
                 try {

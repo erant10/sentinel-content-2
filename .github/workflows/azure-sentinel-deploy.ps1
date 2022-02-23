@@ -269,6 +269,7 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
     }
     catch {
         Write-Host "[Warning] Unable to fetch deployment info for $deploymentName, no metadata was created for the resources in the file"
+        return
     }
     $deploymentInfo | ForEach-Object {
             $sentinelContentKinds = GetContentKinds $_.TargetResource
