@@ -140,11 +140,11 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
         if ($null -ne $contentKind) {
             # sentinel resources detected, deploy a new metadata item for each one
             try {
-                New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath 
-                    -parentResourceId $resource
-                    -kind $contentKind
-                    -sourceControlId $sourceControlId
-                    -workspace $workspaceName 
+                New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath `
+                    -parentResourceId $resource `
+                    -kind $contentKind `
+                    -sourceControlId $sourceControlId `
+                    -workspace $workspaceName `
                     -ErrorAction Stop | Out-Host
                 Write-Host "[Info] Created metadata metadata for $contentKind with oparent resource id $resource"
             }

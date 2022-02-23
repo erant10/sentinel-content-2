@@ -44,7 +44,7 @@
                 },
                 "author": {
                     "name": "User Name",
-                    "email": "email2@microsoft.com",
+                    "email": "email3@microsoft.com",
                     "link": "https://www.microsoft.com/"
                 },
                 "support": {
