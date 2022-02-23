@@ -161,7 +161,7 @@ function GetContentKinds($resource) {
 
 function ToContentKind($contentKinds, $resource, $templateObject) {
     if ($contentKinds.Count -eq 1) {
-       return $contentKinds[0] 
+       return $contentKinds 
     }
     if ($resource.Contains('savedSearches')) {
        if ($templateObject.resources.properties.Category -eq "Hunting Queries") {
