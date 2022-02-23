@@ -15,7 +15,7 @@
             "apiVersion": "2021-09-01-preview",
             "properties": {
                 "alertRuleTemplateName": "8595d264-2f64-442d-b293-4e16dffc9882",
-                "displayName": "(Preview) Anomalous Code Execution",
+                "displayName": "(Preview) Anomalous Code Execution 1",
                 "enabled": true,
                 "tactics": [
                     "Execution"
