@@ -274,21 +274,21 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
     Write-Host "[Debug] $deploymentInfo"
     $deploymentInfo | ForEach-Object {
         $resource = $_.TargetResource
-        Write-Host "[Debug] getting content kinds for $resource"
+        Write-Host "[Debug] getting content kinds for resource $resource"
         $sentinelContentKinds = GetContentKinds $resource
         Write-Host "[Debug] sentinelContentKinds $sentinelContentKinds"
         $contentKind = ToContentKind $sentinelContentKinds $templateObject
         Write-Host "[Debug] contentKind $contentKind"
-        if ($null -ne $contentKind) {
+        if ($null -ne $contentKind -and "" -ne $contentKind) {
             # sentinel resources detected, deploy a new metadata item for each one
             try {
-                New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath `
+                New-AzResourceGroupDeployment -Name "md-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath `
                     -parentResourceId $resource `
                     -kind $contentKind `
                     -sourceControlId $sourceControlId `
                     -workspace $workspaceName `
                     -ErrorAction Stop | Out-Host
-                Write-Host "[Info] Created metadata metadata for $contentKind with oparent resource id $resource"
+                Write-Host "[Info] Created metadata metadata for $contentKind with parent resource id $resource"
             }
             catch {
                 Write-Host "[Warning] Failed to deploy metadata for $contentKind with oparent resource id $resource with error $_"
@@ -305,7 +305,7 @@ function ToContentKind($contentKinds, $resource, $templateObject) {
     if ($contentKinds.Count -eq 1) {
        return $contentKinds
     }
-    if ($resource.Contains('savedSearches')) {
+    if ($null -ne $resource -and $resource.Contains('savedSearches')) {
        if ($templateObject.resources.properties.Category -eq "Hunting Queries") {
            return "HuntingQuery"
        }
