@@ -28,7 +28,7 @@ $sentinelResourcePatterns = @{
     "AutomationRule" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/providers/Microsoft.SecurityInsights/automationRules/$namePattern"
     "HuntingQuery" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/savedSearches/$namePattern"
     "Parser" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.OperationalInsights/workspaces/$namePattern/savedSearches/$namePattern"
-    "Playbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Logic/workflows/$namePattern",
+    "Playbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Logic/workflows/$namePattern"
     "Workbook" = "/subscriptions/$guidPattern/resourceGroups/$namePattern/providers/Microsoft.Insights/workbooks/$namePattern"
 }
 
@@ -261,36 +261,39 @@ function IsRetryable($deploymentName) {
     }
 }
 
-function GetContentKinds($resource) {
-    return $sentinelResourcePatterns.Keys | where $resource -match $sentinelResourcePatterns[$kind]
-}
-
-function ToContentKind($contentKinds, $resource) {
-     if ($contentKinds.Count -eq 1) {
-        return $contentKinds[0] 
-     }
-     if $contentKinds.Contains('HuntingQuery''Parser') {
-
-     }
-}
 
 function DeployMetadata($deploymentName, $resourceGroupName, $templateObject) {
      Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName -ErrorAction Ignore | ForEach-Object {
          $sentinelContentKinds = GetContentKinds $_.TargetResource
-        if ($sentinelContentKinds.Count -gt 0) {
+         $contentKind = ToContentKind $sentinelContentKinds $templateObject
+        if ($null -ne $contentKind) {
             # sentinel resources detected, deploy a new metadata item for each one
-            
-            $sentinelContentKinds | Where {  } | ForEach {
-
-            }
+            Write-Host "Creating metadata for $contentKind with resource ${$_.TargetResource}"
             New-AzResourceGroupDeployment -Name "metadata-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath 
                 -parentResourceId $_.TargetResource
-                -kind ToContentKind $sentinelContentKinds $templateObject
+                -kind $contentKind
                 -sourceControlId $sourceControlId
                 -workspace $workspaceName 
                 -ErrorAction Stop | Out-Host
         }
     }
+}
+
+function GetContentKinds($resource) {
+    return $sentinelResourcePatterns.Keys | Where-Object { $resource -match $sentinelResourcePatterns[$kind] }
+}
+
+function ToContentKind($contentKinds, $resource, $templateObject) {
+    if ($contentKinds.Count -eq 1) {
+       return $contentKinds[0] 
+    }
+    if ($resource.Contains('savedSearches')) {
+       if ($templateObject.resources.properties.Category -eq "Hunting Queries") {
+           return "HuntingQuery"
+       }
+       return "Parser"
+    }
+    return $null
 }
 
 function IsValidResourceType($template) {
