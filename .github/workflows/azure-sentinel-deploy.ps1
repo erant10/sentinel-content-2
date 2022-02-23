@@ -294,7 +294,7 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
 }
 
 function GetContentKinds($resource) {
-    return $sentinelResourcePatterns.Keys | Where-Object { $resource -match $sentinelResourcePatterns[$kind] }
+    return $sentinelResourcePatterns.Keys | Where-Object { $resource -match $sentinelResourcePatterns[$_] }
 }
 
 function ToContentKind($contentKinds, $resource, $templateObject) {
