@@ -30,7 +30,7 @@ if ([string]::IsNullOrEmpty($contentTypes)) {
     $contentTypes = "AnalyticsRule"
 }
 
-$metadataFilePath = ".github\workflows\.sentinel\metadata.json"
+$metadataFilePath = $Directory + "\" + ".github\workflows\.sentinel\metadata.json"
 @"
 {
     "`$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -130,15 +130,14 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
         return
     }
     Write-Host "[Debug] $deploymentInfo"
-    $deploymentInfo | ForEach-Object {
+    $deploymentInfo | Where-Object { $_.TargetResource -ne "" } | ForEach-Object {
         $resource = $_.TargetResource
         Write-Host "[Debug] getting content kinds for $resource"
         $sentinelContentKinds = GetContentKinds $resource
         Write-Host "[Debug] sentinelContentKinds $sentinelContentKinds"
-        $contentKind = ToContentKind $sentinelContentKinds $templateObject
-        Write-Host "[Debug] contentKind $contentKind"
-        if ($null -ne $contentKind) {
-            # sentinel resources detected, deploy a new metadata item for each one
+        if ($sentinelContentKinds.Count -gt 0) {
+            $contentKind = ToContentKind $sentinelContentKinds $templateObject
+            Write-Host "[Debug] contentKind $contentKind"
             try {
                 New-AzResourceGroupDeployment -Name "md-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath `
                     -parentResourceId $resource `
