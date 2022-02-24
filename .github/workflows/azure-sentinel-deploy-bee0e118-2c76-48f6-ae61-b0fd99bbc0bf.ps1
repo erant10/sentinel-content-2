@@ -136,7 +136,7 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
         $sentinelContentKinds = GetContentKinds $resource
         Write-Host "[Debug] sentinelContentKinds $sentinelContentKinds"
         if ($sentinelContentKinds.Count -gt 0) {
-            $contentKind = ToContentKind $sentinelContentKinds $templateObject
+            $contentKind = ToContentKind $sentinelContentKinds $resource $templateObject
             Write-Host "[Debug] contentKind $contentKind"
             try {
                 New-AzResourceGroupDeployment -Name "md-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath `
