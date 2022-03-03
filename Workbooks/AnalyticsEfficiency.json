@@ -3,7 +3,7 @@
     "parameters": {
       "workbookDisplayName": {
         "type": "string",
-        "defaultValue": "Analytics Efficiency - CyberSecuritySoc2",
+        "defaultValue": "Analytics Efficiency - CyberSecuritySoc3",
         "metadata": {
           "description": "The friendly name for the workbook that is used in the Gallery or Saved List.  This name must be unique within a resource group."
         }
@@ -17,14 +17,14 @@
       },
       "workbookSourceId": {
         "type": "string",
-        "defaultValue": "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourcegroups/soc/providers/microsoft.operationalinsights/workspaces/cybersecuritysoc",
+        "defaultValue": "/subscriptions/419581d6-4853-49bd-83b6-d94bb8a77887/resourcegroups/cac-test-rg/providers/microsoft.operationalinsights/workspaces/cac-test-la",
         "metadata": {
           "description": "The id of resource instance to which the workbook will be associated"
         }
       },
       "workbookId": {
         "type": "string",
-        "defaultValue": "3c5f9029-e8ea-4c4a-856a-9c0b1253e0a9",
+        "defaultValue": "f98963a7-c5f4-434d-8f35-072ab10af630",
         "metadata": {
           "description": "The unique guid for this workbook instance"
         }
