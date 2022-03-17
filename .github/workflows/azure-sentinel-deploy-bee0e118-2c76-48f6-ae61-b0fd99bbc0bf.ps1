@@ -47,10 +47,13 @@ $metadataFilePath = $Directory + "\" + ".github\workflows\.sentinel\metadata.jso
         },
         "workspace": {
             "type": "string"
-        }
+        },
+	"contentId": {
+	    "type": "string"
+	}
     },
     "variables": {
-        "metadataName": "[guid(parameters('parentResourceId'))]"
+        "metadataName": "[concat(parameters('kind'), '-', parameters('contentId'))]"
     },
     "resources": [
         {
@@ -137,11 +140,13 @@ function AttemptDeployMetadata($deploymentName, $resourceGroupName, $templateObj
         Write-Host "[Debug] sentinelContentKinds $sentinelContentKinds"
         if ($sentinelContentKinds.Count -gt 0) {
             $contentKind = ToContentKind $sentinelContentKinds $resource $templateObject
+	    $contentId = $resource.Split("/")[-1]
             Write-Host "[Debug] contentKind $contentKind"
             try {
                 New-AzResourceGroupDeployment -Name "md-$deploymentName" -ResourceGroupName $ResourceGroupName -TemplateFile $metadataFilePath `
                     -parentResourceId $resource `
                     -kind $contentKind `
+		    -contentId $contentId `
                     -sourceControlId $sourceControlId `
                     -workspace $workspaceName `
                     -ErrorAction Stop | Out-Host
