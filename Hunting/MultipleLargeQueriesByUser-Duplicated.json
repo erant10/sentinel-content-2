@@ -8,13 +8,13 @@
     },
     "resources": [
         {
-            "name": "[concat(parameters('workspace'), '/5fa83ee1-093b-4b8d-90b5-f41a2ab0ec8e')]",
+            "name": "[concat(parameters('workspace'), '/635a9507-b7b7-4332-816d-351798a47c4a')]",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "apiVersion": "2020-08-01",
             "properties": {
                 "Category": "Hunting Queries",
-                "DisplayName": "Multiple large queries made by user",
+                "DisplayName": "Multiple large queries made by user 3",
                 "Query": "let UI_apps = dynamic(['ASI_Portal','AzureMonitorLogsConnector','AppAnalytics']);\r\n  let threshold = 3;\r\n  LAQueryLogs\r\n  | where (ResponseRowCount == 10001 and RequestClientApp in(UI_apps)) or (ResponseRowCount > 10001 and RequestClientApp !in(UI_apps))\r\n  | summarize count() by AADEmail\r\n  | where count_ > threshold\r\n  | join kind=rightsemi (\r\n  LAQueryLogs\r\n  | where (ResponseRowCount == 10001 and RequestClientApp in(UI_apps)) or (ResponseRowCount > 10001 and RequestClientApp !in(UI_apps)))\r\n  on AADEmail\r\n  | extend timestamp = TimeGenerated, AccountCustomEntity = AADEmail",
                 "Tags": [
                     {
