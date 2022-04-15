@@ -9,7 +9,8 @@ name: Deploy Content to cac-test-la [78ec3b1a-f4e0-44b7-8c2f-db7335ae7cb1]
 #   2. Append the path to the directory environment variable below
 #       directory: '${{ github.workspace }}/SentinelContent'
 
-on: 
+on:
+  workflow_dispatch: 
   push:
     branches: [ develop ]
     paths:
